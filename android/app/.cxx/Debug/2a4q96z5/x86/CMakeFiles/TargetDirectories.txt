@@ -1,0 +1,2 @@
+D:/git_repo/crisis-relief-app/android/app/.cxx/Debug/2a4q96z5/x86/CMakeFiles/edit_cache.dir
+D:/git_repo/crisis-relief-app/android/app/.cxx/Debug/2a4q96z5/x86/CMakeFiles/rebuild_cache.dir
