@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:relieflink/login/loginscreen.dart';
-import 'package:relieflink/shared_preferences.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String databaseUrl =
-    "https://relieflink-e824d-default-rtdb.firebaseio.com";
+const String databaseUrl = "https://relieflink-e824d-default-rtdb.firebaseio.com";
 
 // Fetch universalId from SharedPreferences
 Future<String> getUniversalId() async {
@@ -20,7 +16,7 @@ Future<void> addPost(String title, String description) async {
   try {
     final url = Uri.parse("$databaseUrl/posts.json");
     String userId = await getUniversalId();
-
+    
     await http.post(
       url,
       body: jsonEncode({
@@ -41,12 +37,11 @@ Future<void> addPost(String title, String description) async {
 Future<int> toggleLikePost(String postId, int currentLikes) async {
   try {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool liked = prefs.getBool('liked_$postId') ??
-        false; // Check if user has liked before
+    bool liked = prefs.getBool('liked_$postId') ?? false; // Check if user has liked before
     final url = Uri.parse("$databaseUrl/posts/$postId.json");
 
     int newlikes = liked ? currentLikes - 1 : currentLikes + 1;
-
+    
     await http.patch(
       url,
       body: jsonEncode({'likes': liked ? currentLikes - 1 : currentLikes + 1}),
@@ -83,16 +78,10 @@ class CommunityForum extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Community Discussion".tr)),
+      appBar: AppBar(title: Text("Community Discussion")),
       body: PostList(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (logStatus) {
-            _showPostDialog(context);
-          } else {
-            _showLoginDialog(context);
-          }
-        },
+        onPressed: () => _showPostDialog(context),
         child: Icon(Icons.add),
       ),
     );
@@ -106,27 +95,22 @@ class CommunityForum extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Create a Post".tr),
+          title: Text("Create a Post"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(labelText: "Title".tr)),
-              TextField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(labelText: "Description".tr)),
+              TextField(controller: titleController, decoration: InputDecoration(labelText: "Title")),
+              TextField(controller: descriptionController, decoration: InputDecoration(labelText: "Description")),
             ],
           ),
           actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context), child: Text("Cancel".tr)),
+            TextButton(onPressed: () => Navigator.pop(context), child: Text("Cancel")),
             TextButton(
               onPressed: () {
                 addPost(titleController.text, descriptionController.text);
                 Navigator.pop(context);
               },
-              child: Text("Post".tr),
+              child: Text("Post"),
             ),
           ],
         );
@@ -140,9 +124,11 @@ class PostList extends StatefulWidget {
   _PostListState createState() => _PostListState();
 }
 
+bool reported = false;
 class _PostListState extends State<PostList> {
   List<Map<String, dynamic>> posts = [];
   Map<String, List<Map<String, dynamic>>> comments = {};
+  Set<String> reportedPosts = {}; // Track reported posts
 
   Future<void> fetchPosts() async {
     try {
@@ -206,6 +192,7 @@ class _PostListState extends State<PostList> {
             itemCount: posts.length,
             itemBuilder: (context, index) {
               var post = posts[index];
+              bool isReported = reportedPosts.contains(post['id']); // Check if reported
               return Card(
                 margin: EdgeInsets.all(10),
                 child: Padding(
@@ -216,65 +203,70 @@ class _PostListState extends State<PostList> {
                       // Post Title in Bold
                       Text(
                         post['title'],
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       SizedBox(height: 5),
                       Text(post['description']),
                       SizedBox(height: 10),
 
                       // Like & Comment buttons
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          FutureBuilder<bool>(
-                            future: _hasLikedPost(post['id']),
-                            builder: (context, snapshot) {
-                              bool liked = snapshot.data ?? false;
-                              return Row(
-                                children: [
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.thumb_up,
-                                      color: liked ? Colors.blue : null,
-                                    ),
-                                    onPressed: () async {
-                                      int updatelikes = await toggleLikePost(
-                                          post['id'], post['likes']);
-                                      setState(() {
-                                        posts[index]['likes'] = updatelikes;
-                                      });
-                                    },
-                                  ),
-                                  Text("${post['likes']} Likes".tr),
-                                ],
-                              );
-                            },
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              FutureBuilder<bool>(
+                                future: _hasLikedPost(post['id']),
+                                builder: (context, snapshot) {
+                                  bool liked = snapshot.data ?? false;
+                                  return Row(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.thumb_up, color: liked ? Colors.blue : null),
+                                        onPressed: () async {
+                                          int updatedLikes = await toggleLikePost(post['id'], post['likes']);
+                                          setState(() {
+                                            posts[index]['likes'] = updatedLikes;
+                                          });
+                                        },
+                                      ),
+                                      Text("${post['likes']} Likes"),
+                                      IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            if (isReported) {
+                                              reportedPosts.remove(post['id']); // Unmark if already reported
+                                            } else {
+                                              reportedPosts.add(post['id']); // Mark as reported
+                                            }
+                                          });
+                                        },
+                                        icon: Icon(Icons.error_outline, color: isReported ? Colors.red : null),
+                                      ),
+                                      Text("Report Misinformation", overflow: TextOverflow.ellipsis, style: TextStyle(color: isReported ? Colors.red : null)),
+                                    ],
+                                  );
+                                },
+                              ),
+                              
+                            ],
                           ),
-                          IconButton(
-                              icon: Icon(Icons.comment),
-                              onPressed: () {
-                                if (logStatus) {
-                                  _showCommentDialog(context, post['id']);
-                                } else {
-                                  _showLoginDialog(context);
-                                }
-                              }),
-                        ],
+                        ),
                       ),
-
+                      IconButton(
+                                icon: Icon(Icons.comment),
+                                onPressed: () => _showCommentDialog(context, post['id']),
+                              ),
                       // Display Comments
-                      if (comments.containsKey(post['id']) &&
-                          comments[post['id']]!.isNotEmpty)
+                      if (comments.containsKey(post['id']) && comments[post['id']]!.isNotEmpty)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Comments".tr,
-                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text("Comments", style: TextStyle(fontWeight: FontWeight.bold)),
                             ...comments[post['id']]!.map((comment) => Padding(
                                   padding: EdgeInsets.symmetric(vertical: 2),
-                                  child: Text(
-                                      "${comment['userId']}: ${comment['text']}"),
+                                  child: Text("${comment['userId']}: ${comment['text']}"),
                                 )),
                           ],
                         ),
@@ -298,47 +290,20 @@ class _PostListState extends State<PostList> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Add Comment".tr),
-          content: TextField(
-              controller: commentController,
-              decoration: InputDecoration(labelText: "Comment".tr)),
+          title: Text("Add Comment"),
+          content: TextField(controller: commentController, decoration: InputDecoration(labelText: "Comment")),
           actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context), child: Text("Cancel".tr)),
+            TextButton(onPressed: () => Navigator.pop(context), child: Text("Cancel")),
             TextButton(
               onPressed: () {
                 addComment(postId, commentController.text);
                 Navigator.pop(context);
               },
-              child: Text("Comment".tr),
+              child: Text("Comment"),
             ),
           ],
         );
       },
     );
   }
-}
-
-void _showLoginDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text('Login Required'.tr),
-      content: Text('You need to login to comment/post. Please login first.'.tr),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child:  Text('Cancel'.tr),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (ctx) => LoginScreen()),
-            );
-          },
-          child:  Text('Login'.tr),
-        ),
-      ],
-    ),
-  );
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:relieflink/screens/razorpay_screen.dart';
 
-class DonationDetails extends StatelessWidget {
+class DonationDetails extends StatefulWidget {
   const DonationDetails({
     super.key,
     required this.title,
@@ -20,13 +20,18 @@ class DonationDetails extends StatelessWidget {
   final String merchantId;
 
   @override
+  State<DonationDetails> createState() => _DonationDetailsState();
+}
+
+class _DonationDetailsState extends State<DonationDetails> {
+  bool reported = false;
+  @override
   Widget build(BuildContext context) {
     final double progress = 0;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
         backgroundColor: Colors.green,
       ),
       body: Padding(
@@ -39,9 +44,9 @@ class DonationDetails extends StatelessWidget {
               borderRadius: BorderRadius.circular(12.0),
               child: // In DonationDetails.dart, update the Image.network part:
 
-                // Replace the current Image.network with this:
+                  // Replace the current Image.network with this:
                   Image.network(
-                imageUrl,
+                widget.imageUrl,
                 height: 250.0,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -81,7 +86,7 @@ class DonationDetails extends StatelessWidget {
             const SizedBox(height: 16.0),
             // Title and Organization
             Text(
-              title,
+              widget.title,
               style: const TextStyle(
                 fontSize: 24.0,
                 fontWeight: FontWeight.bold,
@@ -89,7 +94,7 @@ class DonationDetails extends StatelessWidget {
             ),
             const SizedBox(height: 8.0),
             Text(
-              'By $organization',
+              'By ${widget.organization}',
               style: TextStyle(
                 color: Colors.grey[700],
                 fontSize: 16.0,
@@ -153,8 +158,8 @@ class DonationDetails extends StatelessWidget {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (ctx) => CampaignDonationPage(
-                                  campaignId: title,
-                                  merchantId: merchantId,
+                                  campaignId: widget.title,
+                                  merchantId: widget.merchantId,
                                 ),
                               ),
                             );
@@ -173,6 +178,25 @@ class DonationDetails extends StatelessWidget {
                 ),
                 child: const Text('Donate Now'),
               ),
+            ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      reported = !reported;
+                    });
+                  },
+                  icon: Icon(Icons.report_gmailerrorred,
+                      color: reported ? Colors.red : null),
+                ),
+                Text(
+                  'Report a fraud',
+                  style: TextStyle(
+                    color: reported ? Colors.red : null,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

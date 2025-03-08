@@ -3,7 +3,7 @@ import 'package:relieflink/login/loginscreen.dart';
 import 'package:relieflink/models/volunteer/volunteer_page.dart';
 import 'package:relieflink/shared_preferences.dart';
 
-class VolunteerDetails extends StatelessWidget {
+class VolunteerDetails extends StatefulWidget {
   const VolunteerDetails({
     super.key,
     required this.title,
@@ -19,6 +19,12 @@ class VolunteerDetails extends StatelessWidget {
   final String description;
   final String imageUrl;
 
+  @override
+  State<VolunteerDetails> createState() => _VolunteerDetailsState();
+}
+
+class _VolunteerDetailsState extends State<VolunteerDetails> {
+  bool reported = false;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -39,7 +45,7 @@ class VolunteerDetails extends StatelessWidget {
                 alignment: Alignment.bottomLeft,
                 children: [
                   Image.network(
-                    imageUrl,
+                    widget.imageUrl,
                     width: double.infinity,
                     height: 250,
                     fit: BoxFit.cover,
@@ -65,7 +71,7 @@ class VolunteerDetails extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      title,
+                      widget.title,
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -78,17 +84,17 @@ class VolunteerDetails extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             Text(
-              'By $organization',
+              'By ${widget.organization}',
               style: TextStyle(fontSize: 16, color: Colors.grey[700]),
             ),
             const SizedBox(height: 10.0),
             Text(
-              'Target: $target',
+              'Target: ${widget.target}',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16.0),
             Text(
-              description,
+              widget.description,
               style: const TextStyle(
                   fontSize: 16, height: 1.5), // Improved line height
             ),
@@ -109,10 +115,10 @@ class VolunteerDetails extends StatelessWidget {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (ctx) => VolunteerPage(
-                          title: title,
-                          organization: organization,
-                          description: description,
-                          imageUrl: imageUrl,
+                          title: widget.title,
+                          organization: widget.organization,
+                          description: widget.description,
+                          imageUrl: widget.imageUrl,
                         ),
                       ),
                     );
@@ -125,6 +131,25 @@ class VolunteerDetails extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
+            ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      reported = !reported;
+                    });
+                  },
+                  icon: Icon(Icons.report_gmailerrorred,
+                      color: reported ? Colors.red : null),
+                ),
+                Text(
+                  'Report a fraud',
+                  style: TextStyle(
+                    color: reported ? Colors.red : null,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
