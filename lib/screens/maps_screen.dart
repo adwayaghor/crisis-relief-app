@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
+import 'package:relieflink/models/notification.dart';
 
 class DisasterMapScreen extends StatefulWidget {
   const DisasterMapScreen({super.key});
@@ -15,12 +18,17 @@ class DisasterMapScreen extends StatefulWidget {
 class _DisasterMapScreenState extends State<DisasterMapScreen> {
   GoogleMapController? _mapController;
   LocationData? _currentLocation;
-  Location _locationService = Location();
+  final _locationService = Location();
   Set<Marker> _markers = {};
   bool _isLoading = true;
   bool _locationError = false;
+  final Set<String> _notifiedDisasters =
+      {}; // To prevent duplicate notifications
 
-  final String firebaseUrl = 'https://relieflink-e824d-default-rtdb.firebaseio.com';
+  final String firebaseUrl =
+      'https://relieflink-e824d-default-rtdb.firebaseio.com';
+  // Notification range
+  final double notificationRadius = 2000.0; 
 
   @override
   void initState() {
@@ -41,7 +49,7 @@ class _DisasterMapScreenState extends State<DisasterMapScreen> {
     });
   }
 
-  /// Get user's current location
+  // Get user's current location
   Future<bool> _getUserLocation() async {
     try {
       bool serviceEnabled = await _locationService.serviceEnabled();
@@ -54,7 +62,8 @@ class _DisasterMapScreenState extends State<DisasterMapScreen> {
         }
       }
 
-      PermissionStatus permissionGranted = await _locationService.hasPermission();
+      PermissionStatus permissionGranted =
+          await _locationService.hasPermission();
       if (permissionGranted == PermissionStatus.denied) {
         permissionGranted = await _locationService.requestPermission();
         if (permissionGranted != PermissionStatus.granted) {
@@ -101,6 +110,7 @@ class _DisasterMapScreenState extends State<DisasterMapScreen> {
 
           data.forEach((key, value) {
             _addMarker(key, value, newMarkers);
+            _checkAndNotify(key, value);
           });
 
           setState(() {
@@ -144,15 +154,58 @@ class _DisasterMapScreenState extends State<DisasterMapScreen> {
         ),
       ),
     );
-  } 
- 
-  @override 
-  Widget build(BuildContext context) { 
+  }
+
+  void _checkAndNotify(String disasterId, Map<String, dynamic> disaster) {
+    if (_currentLocation == null) return;
+
+    double userLat = _currentLocation!.latitude!;
+    double userLng = _currentLocation!.longitude!;
+    double disasterLat = (disaster['latitude'] ?? 0.0).toDouble();
+    double disasterLng = (disaster['longitude'] ?? 0.0).toDouble();
+
+    double distance =
+        _calculateDistance(userLat, userLng, disasterLat, disasterLng);
+    if (distance <= notificationRadius &&
+        !_notifiedDisasters.contains(disasterId)) {
+      _notifiedDisasters.add(disasterId);
+      NotiServcie().showNotification(
+        title: "🚨 Nearby Disaster Alert!",
+        description:
+            "${disaster['type']} detected within ${distance.toStringAsFixed(2)} km.\nSeverity: ${disaster['criticalLevel']}. Stay safe!",
+      );
+    }
+  }
+
+  double _calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) {
+    const double R = 6371;
+    final dLat = _degToRad(lat2 - lat1);
+    final dLon = _degToRad(lon2 - lon1);
+
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_degToRad(lat1)) *
+            cos(_degToRad(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    return R * c; // Distance in km
+  }
+
+  double _degToRad(double deg) {
+    return deg * (pi / 180);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _locationError
-              ? Center(child: Text("⚠️ Unable to get location. Please enable GPS and grant permissions."))
+              ? Center(
+                  child: Text(
+                      "⚠️ Unable to get location. Please enable GPS and grant permissions."))
               : GoogleMap(
                   initialCameraPosition: CameraPosition(
                     target: LatLng(
