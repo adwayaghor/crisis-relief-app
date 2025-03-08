@@ -39,4 +39,22 @@ class GeminiService {
       return "❌ Error: $e";
     }
   }
+
+  static Future<String> getCrisisImageUrl(String crisisTitle) async {
+  final prompt = """
+    Provide a single URL to a royalty-free, high-quality image that represents a "$crisisTitle" crisis.
+    The image should be appropriate for a donation app.
+    Only return a valid image URL with no additional text or explanation.
+    Example: https://example.com/image.jpg
+  """;
+  
+  try {
+    final imageUrl = await generateText(prompt);
+    return imageUrl.trim();
+  } catch (e) {
+    print("❌ Error getting crisis image: $e");
+    // Return a default image if there's an error
+    return "https://educationpost.in/_next/image?url=https%3A%2F%2Fapi.educationpost.in%2Fs3-images%2F1736253267338-untitled%20(39).jpg&w=1920&q=75";
+  }
+}
 }

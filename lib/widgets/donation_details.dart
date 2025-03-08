@@ -8,7 +8,8 @@ class DonationDetails extends StatelessWidget {
     required this.organization,
     required this.target,
     required this.raised,
-    required this.imageUrl, required this.merchantId,
+    required this.imageUrl,
+    required this.merchantId,
   });
 
   final String title;
@@ -36,11 +37,45 @@ class DonationDetails extends StatelessWidget {
             // Image display (Using NetworkImage if a URL is provided)
             ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
-              child: Image.network(
+              child: // In DonationDetails.dart, update the Image.network part:
+
+                // Replace the current Image.network with this:
+                  Image.network(
                 imageUrl,
                 height: 250.0,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    height: 250.0,
+                    width: double.infinity,
+                    color: Colors.grey[300],
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  print('Error loading image: $error');
+                  return Container(
+                    height: 250.0,
+                    width: double.infinity,
+                    color: Colors.grey[300],
+                    child: const Center(
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 40,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 16.0),
@@ -130,13 +165,13 @@ class DonationDetails extends StatelessWidget {
                     ),
                   );
                 },
-                child: const Text('Donate Now'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       Colors.green, // Background color of the button
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   textStyle: const TextStyle(fontSize: 18.0),
                 ),
+                child: const Text('Donate Now'),
               ),
             ),
           ],

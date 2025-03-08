@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:relieflink/login/loginscreen.dart';
 import 'package:relieflink/shared_preferences.dart';
@@ -82,7 +83,7 @@ class CommunityForum extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Community Discussion")),
+      appBar: AppBar(title: Text("Community Discussion".tr)),
       body: PostList(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -105,27 +106,27 @@ class CommunityForum extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Create a Post"),
+          title: Text("Create a Post".tr),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                   controller: titleController,
-                  decoration: InputDecoration(labelText: "Title")),
+                  decoration: InputDecoration(labelText: "Title".tr)),
               TextField(
                   controller: descriptionController,
-                  decoration: InputDecoration(labelText: "Description")),
+                  decoration: InputDecoration(labelText: "Description".tr)),
             ],
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context), child: Text("Cancel")),
+                onPressed: () => Navigator.pop(context), child: Text("Cancel".tr)),
             TextButton(
               onPressed: () {
                 addPost(titleController.text, descriptionController.text);
                 Navigator.pop(context);
               },
-              child: Text("Post"),
+              child: Text("Post".tr),
             ),
           ],
         );
@@ -245,7 +246,7 @@ class _PostListState extends State<PostList> {
                                       });
                                     },
                                   ),
-                                  Text("${post['likes']} Likes"),
+                                  Text("${post['likes']} Likes".tr),
                                 ],
                               );
                             },
@@ -268,7 +269,7 @@ class _PostListState extends State<PostList> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Comments",
+                            Text("Comments".tr,
                                 style: TextStyle(fontWeight: FontWeight.bold)),
                             ...comments[post['id']]!.map((comment) => Padding(
                                   padding: EdgeInsets.symmetric(vertical: 2),
@@ -297,19 +298,19 @@ class _PostListState extends State<PostList> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Add Comment"),
+          title: Text("Add Comment".tr),
           content: TextField(
               controller: commentController,
-              decoration: InputDecoration(labelText: "Comment")),
+              decoration: InputDecoration(labelText: "Comment".tr)),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context), child: Text("Cancel")),
+                onPressed: () => Navigator.pop(context), child: Text("Cancel".tr)),
             TextButton(
               onPressed: () {
                 addComment(postId, commentController.text);
                 Navigator.pop(context);
               },
-              child: Text("Comment"),
+              child: Text("Comment".tr),
             ),
           ],
         );
@@ -322,12 +323,12 @@ void _showLoginDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Login Required'),
-      content: const Text('You need to login to comment/post. Please login first.'),
+      title: Text('Login Required'.tr),
+      content: Text('You need to login to comment/post. Please login first.'.tr),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child:  Text('Cancel'.tr),
         ),
         TextButton(
           onPressed: () {
@@ -335,7 +336,7 @@ void _showLoginDialog(BuildContext context) {
               MaterialPageRoute(builder: (ctx) => LoginScreen()),
             );
           },
-          child: const Text('Login'),
+          child:  Text('Login'.tr),
         ),
       ],
     ),

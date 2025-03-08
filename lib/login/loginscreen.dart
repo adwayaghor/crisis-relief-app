@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (shouldSend == true) {
-      if (_enteredEmail == '@admin') {
+      if (_enteredEmail == '@admins') {
         await saveAdminStatus(true);
         adminLog = true;
         await saveIDStatus(_enteredEmail);

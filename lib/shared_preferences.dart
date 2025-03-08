@@ -5,6 +5,17 @@ bool adminLog = false;
 String universalId = 'Sign Up/ Login to view details';
 String name = '';
 bool isNGO = false;
+String language = 'English';
+
+Future<void> loadLangStatus() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  language = prefs.getString('language') ?? 'English';
+}
+
+Future<void> saveLangStatus(String value) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('language', value);
+}
 
 Future<void> loadIDStatus() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();

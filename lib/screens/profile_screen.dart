@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:relieflink/login/loginscreen.dart';
 import 'package:relieflink/login/splash_screen.dart';
-// import 'package:relieflink/models/donation/create_campaign_card.dart';
-// import 'package:relieflink/models/volunteer/add_announcements.dart';
-// import 'package:relieflink/models/volunteer/approve_volunteer.dart';
-// import 'package:relieflink/models/volunteer/volunteer_card_create.dart';
+import 'package:relieflink/models/donation/create_campaign_card.dart';
+import 'package:relieflink/models/volunteer/add_announcements.dart';
+import 'package:relieflink/models/volunteer/approve_volunteer.dart';
+import 'package:relieflink/models/volunteer/volunteer_card_create.dart';
 import 'package:relieflink/screens/transparency_screen.dart';
 import 'package:relieflink/services/donation_service.dart';
 import 'package:relieflink/shared_preferences.dart';
@@ -32,7 +33,7 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: Text('My Profile'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -96,7 +97,7 @@ class ProfileScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (ctx) => const LoginScreen()),
                     );
                   },
-                  child: const Text('Login/Signup'),
+                  child: Text('Login/Signup'.tr),
                 ),
               ),
               const SizedBox(height: 24.0),
@@ -112,8 +113,8 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      const Text(
-                        'Your Impact',
+                      Text(
+                        'Your Impact'.tr,
                         style: TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
@@ -128,7 +129,7 @@ class ProfileScreen extends StatelessWidget {
                               ConnectionState.waiting) {
                             return const CircularProgressIndicator();
                           } else if (snapshot.hasError) {
-                            return const Text('Error loading donations');
+                            return Text('Error loading donations'.tr);
                           } else {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -136,7 +137,7 @@ class ProfileScreen extends StatelessWidget {
                                 Column(
                                   children: [
                                     Text(
-                                      snapshot.data.toString(),
+                                      snapshot.data.toString().tr,
                                       style: TextStyle(
                                         fontSize: 20.0,
                                         fontWeight: FontWeight.bold,
@@ -145,7 +146,7 @@ class ProfileScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4.0),
                                     Text(
-                                      'Total Donated',
+                                      'Total Donated'.tr,
                                       style: TextStyle(
                                         fontSize: 12.0,
                                         color: Colors.grey[700],
@@ -165,7 +166,7 @@ class ProfileScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4.0),
                                     Text(
-                                      'Donations',
+                                      'Donations'.tr,
                                       style: TextStyle(
                                         fontSize: 12.0,
                                         color: Colors.grey[700],
@@ -185,7 +186,7 @@ class ProfileScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4.0),
                                     Text(
-                                      'Organizations',
+                                      'Organizations'.tr,
                                       style: TextStyle(
                                         fontSize: 12.0,
                                         color: Colors.grey[700],
@@ -208,7 +209,7 @@ class ProfileScreen extends StatelessWidget {
                                   builder: (ctx) => TransparencyScreen()),
                             );
                           },
-                          child: const Text('View Detailed Impact'),
+                          child: Text('View Detailed Impact'.tr),
                         ),
                       ),
                     ],
@@ -216,6 +217,84 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24.0),
+              Visibility(
+                visible: isNGO,
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.volunteer_activism),
+                      title: const Text('Create Campaign'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16.0),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (ctx) => CreateCampaignCard(
+                              ngoEmail: universalId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.people),
+                      title: const Text('Request Volunteers'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16.0),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (ctx) => CreateVolunteerCard(
+                              ngoEmail: universalId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.people),
+                      title: const Text('Approve Volunteers'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16.0),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (ctx) => ApproveVolunteer(),
+                          ),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.people),
+                      title: const Text('Add Announcements'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16.0),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (ctx) => AddAnnouncements(),
+                          ),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.book),
+                      title: const Text('Add Resources'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16.0),
+                      onTap: () {
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (ctx) => CreateVolunteerCard(
+                        //       ngoEmail: universalId,
+                        //     ),
+                        //   ),
+                        // );
+                      },
+                    ),
+                  ],
+                ),
+              ),
 
               // Logout button
               Visibility(
@@ -227,19 +306,18 @@ class ProfileScreen extends StatelessWidget {
                       bool shouldExit = await showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text("Log Out?"),
-                          content: const Text(
-                              "You will be signed out of the application. Do you really want to log out?"),
+                          title: Text("Log Out?".tr),
+                          content: Text(
+                              "You will be signed out of the application. Do you really want to log out?"
+                                  .tr),
                           actions: [
                             TextButton(
-                              onPressed: () =>
-                                  Navigator.of(context).pop(false),
-                              child: const Text("No"),
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text("No".tr),
                             ),
                             TextButton(
-                              onPressed: () =>
-                                  Navigator.of(context).pop(true),
-                              child: const Text("Yes"),
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: Text("Yes".tr),
                             ),
                           ],
                         ),
@@ -261,7 +339,7 @@ class ProfileScreen extends StatelessWidget {
                       side: const BorderSide(color: Colors.red),
                       foregroundColor: Colors.red,
                     ),
-                    child: const Text('Logout'),
+                    child: Text('Logout'.tr),
                   ),
                 ),
               ),

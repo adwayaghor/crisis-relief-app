@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:relieflink/screens/awareness_screen.dart';
 import 'package:relieflink/screens/dashboard_screen.dart';
 import 'package:relieflink/screens/donation_screen.dart';
@@ -38,26 +39,26 @@ class _HomePageState extends State<HomePage> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF2D7DD2),
         unselectedItemColor: Colors.grey,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            label: 'Dashboard'.tr,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.volunteer_activism),
-            label: 'Donate',
+            label: 'Donate'.tr,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
-            label: 'Volunteer',
+            label: 'Volunteer'.tr,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.campaign),
-            label: 'Awareness',
+            label: 'Awareness'.tr,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: 'Profile'.tr,
           ),
         ],
       ),

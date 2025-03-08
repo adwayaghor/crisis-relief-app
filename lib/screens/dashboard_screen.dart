@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:relieflink/main.dart';
 import 'dart:convert';
 import 'package:relieflink/models/crisis_update_card.dart';
 import 'package:relieflink/screens/ai_map_screen.dart';
 import 'package:relieflink/screens/forum_screen.dart';
 import 'package:relieflink/screens/maps_screen.dart';
 import 'package:relieflink/screens/gemini_api.dart';
+import 'package:relieflink/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class Crisis {
   final String title;
@@ -24,9 +29,10 @@ abstract class Crisis {
   // Factory constructor to create Crisis objects from Gemini API JSON
   static Crisis fromGeminiJson(Map<String, dynamic> json) {
     final type = json['type'] ?? 'Unknown';
-    
-    if (type.toLowerCase().contains('natural') || 
-        ['earthquake', 'flood', 'hurricane', 'tsunami', 'wildfire', 'volcano'].any((t) => type.toLowerCase().contains(t))) {
+
+    if (type.toLowerCase().contains('natural') ||
+        ['earthquake', 'flood', 'hurricane', 'tsunami', 'wildfire', 'volcano']
+            .any((t) => type.toLowerCase().contains(t))) {
       return NaturalDisaster(
         title: json['title'] ?? 'No Title',
         description: json['description'] ?? 'No Description Available',
@@ -35,8 +41,8 @@ abstract class Crisis {
         date: json['date'] ?? DateTime.now().toString(),
         criticalLevel: json['severity'] ?? 'Medium',
       );
-    } else if (type.toLowerCase().contains('conflict') || 
-               type.toLowerCase().contains('humanitarian')) {
+    } else if (type.toLowerCase().contains('conflict') ||
+        type.toLowerCase().contains('humanitarian')) {
       return HumanitarianCrisis(
         title: json['title'] ?? 'No Title',
         description: json['description'] ?? 'No Description Available',
@@ -45,9 +51,9 @@ abstract class Crisis {
         date: json['date'] ?? DateTime.now().toString(),
         criticalLevel: json['severity'] ?? 'Medium',
       );
-    } else if (type.toLowerCase().contains('disease') || 
-               type.toLowerCase().contains('pandemic') ||
-               type.toLowerCase().contains('outbreak')) {
+    } else if (type.toLowerCase().contains('disease') ||
+        type.toLowerCase().contains('pandemic') ||
+        type.toLowerCase().contains('outbreak')) {
       return HealthCrisis(
         title: json['title'] ?? 'No Title',
         description: json['description'] ?? 'No Description Available',
@@ -134,10 +140,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String selectedCategory = "natural_disaster";
   int _currentPage = 0; // Track current page index
 
+  // Add a state variable for the selected language
+  String selectedLanguage = "English";
+
   @override
   void initState() {
     super.initState();
+    loadSavedLanguage();
     fetchCrisisData();
+  }
+
+  Future<void> loadSavedLanguage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String savedLang = prefs.getString('language') ?? 'English';
+    setState(() {
+      selectedLanguage = savedLang;
+    });
+    Get.updateLocale(Locale(getLocaleCode(savedLang)));
   }
 
   Future<void> fetchCrisisData() async {
@@ -211,8 +230,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     try {
       final String response = await GeminiService.generateText(prompt);
-      final String cleanedResponse = response.replaceAll(RegExp(r'```json|```'), '').trim();
-      
+      final String cleanedResponse =
+          response.replaceAll(RegExp(r'```json|```'), '').trim();
+
       final Map<String, dynamic> jsonData = jsonDecode(cleanedResponse);
 
       if (jsonData.containsKey("crises")) {
@@ -237,7 +257,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Crisis Dashboard')),
+      appBar: AppBar(
+        title: Text('Crisis Dashboard'.tr,),
+        actions: [
+          // Replace the IconButton with a DropdownButton for language selection
+          DropdownButton<String>(
+            icon: const Icon(Icons.language, color: Colors.black), 
+            value: selectedLanguage,
+            onChanged: (String? newValue) async {
+              if (newValue != null) {
+                setState(() {
+                  selectedLanguage = newValue;
+                });
+
+                // Save language preference
+                await saveLangStatus(newValue);
+
+                // Update app locale
+                Get.updateLocale(Locale(getLocaleCode(newValue)));
+              }
+            },
+            items: const [
+              DropdownMenuItem(value: "English", child: Text("English")),
+              DropdownMenuItem(value: "Hindi", child: Text("Hindi")),
+              DropdownMenuItem(value: "Marathi", child: Text("Marathi")),
+              DropdownMenuItem(value: "Tamil", child: Text("Tamil")),
+              DropdownMenuItem(value: "Kannada", child: Text("Kannada")),
+              DropdownMenuItem(value: "German", child: Text("German")),
+              DropdownMenuItem(value: "French", child: Text("French")),
+              DropdownMenuItem(value: "Japanese", child: Text("Japanese")),
+              DropdownMenuItem(value: "Chinese", child: Text("Chinese")),
+              DropdownMenuItem(value: "Korean", child: Text("Korean")),
+            ],
+          )
+        ],
+      ),
       body: Stack(
         children: [
           SafeArea(
@@ -247,7 +301,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    _currentPage == 0 ? 'Urgent Crises' : 'Predicted Crises',
+                    _currentPage == 0
+                        ? 'Urgent Crises'.tr
+                        : 'Predicted Crises'.tr,
                     style: const TextStyle(
                         fontSize: 22.0, fontWeight: FontWeight.bold),
                   ),
@@ -259,32 +315,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _currentPage = 0;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _currentPage == 0
-                                  ? Colors.blueAccent
-                                  : Colors.grey,
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _currentPage = 0;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _currentPage == 0
+                                    ? Colors.blueAccent
+                                    : Colors.grey,
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.fitWidth,
+                                child: Text('Urgent Crises'.tr),
+                              ),
                             ),
-                            child: const Text('Urgent Crises'),
                           ),
                           const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _currentPage = 1;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _currentPage == 1
-                                  ? Colors.blueAccent
-                                  : Colors.grey,
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _currentPage = 1;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _currentPage == 1
+                                    ? Colors.blueAccent
+                                    : Colors.grey,
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.fitWidth,
+                                child: Text('Predicted Crises'.tr),
+                              ),
                             ),
-                            child: const Text('Predicted Crises'),
                           ),
                         ],
                       ),
@@ -314,15 +380,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       DropdownButton<String>(
                         value: selectedCategory,
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                               value: "natural_disaster",
-                              child: Text("Natural Disaster")),
+                              child: Text("Natural Disaster".tr)),
                           DropdownMenuItem(
                               value: "humanitarian_conflict",
-                              child: Text("Humanitarian Conflict")),
+                              child: Text("Humanitarian Conflict".tr)),
                           DropdownMenuItem(
-                              value: "pandemic", child: Text("Pandemic")),
+                              value: "pandemic", child: Text("Pandemic".tr)),
                         ],
                         onChanged: (String? newValue) {
                           if (newValue != null) {
@@ -349,11 +415,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text('Failed to load crisis updates.'),
+                                  Text('Failed to load crisis updates.'.tr),
                                   const SizedBox(height: 16),
                                   ElevatedButton(
                                     onPressed: fetchCrisisData,
-                                    child: const Text('Try Again'),
+                                    child: Text('Try Again'.tr),
                                   ),
                                 ],
                               ),
@@ -364,7 +430,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               itemBuilder: (context, index) {
                                 final crisis = crises[index];
                                 String categoryType = 'Unknown';
-                                
+
                                 if (crisis is NaturalDisaster) {
                                   categoryType = crisis.disasterType;
                                 } else if (crisis is HumanitarianCrisis) {
@@ -372,7 +438,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 } else if (crisis is HealthCrisis) {
                                   categoryType = crisis.diseaseType;
                                 }
-                                
+
                                 return CrisisUpdateCard(
                                   title: crisis.title,
                                   description: crisis.description,

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:relieflink/admin/adminpage.dart';
 import 'package:relieflink/login/splash_screen.dart';
+import 'package:relieflink/models/LocalString.dart';
 import 'package:relieflink/models/database_functions.dart';
 import 'package:relieflink/models/notification.dart';
 import 'package:relieflink/shared_preferences.dart';
@@ -14,6 +18,10 @@ void main() async {
   await loadLoginStatus();
   await loadIDStatus();
   await loadisNGOStatus();
+  await loadLangStatus(); // Ensure language is loaded before the app runs.
+
+  // Apply saved language
+  Get.updateLocale(Locale(getLocaleCode(language))); 
 
   DisasterDataFetcher().fetchAndStoreDisasters();
 
@@ -29,6 +37,33 @@ void main() async {
   runApp(const CrisisAssistApp());
 }
 
+String getLocaleCode(String lang) {
+  switch (lang) {
+    case "Hindi":
+      return "hi_IN";
+    case "Marathi":
+      return "mr_IN";
+    case "Tamil":
+      return "ta_IN";
+    case "Kannada":
+      return "kn_IN";
+    case "German":
+      return "de_DE";
+    case "French":
+      return "fr_FR";
+    case "Japanese":
+      return "ja_JP";
+    case "Chinese":
+      return "zh_CN";
+    case "Korean":
+      return "ko_KR";
+    default:
+      return "en_US";
+  }
+}
+
+
+
 class CrisisAssistApp extends StatelessWidget {
   const CrisisAssistApp({super.key});
 
@@ -40,7 +75,9 @@ class CrisisAssistApp extends StatelessWidget {
       ),
     );
 
-    return MaterialApp(
+    return GetMaterialApp(
+      translations: Localstring(),
+      locale: Locale('en', 'US'),
       title: 'Crisis Assist',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

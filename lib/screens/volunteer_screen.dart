@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:relieflink/models/volunteer/volunteer_details.dart';
 import 'package:relieflink/models/volunteer/your_volunteer.dart';
@@ -54,7 +55,7 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Volunteering Campaigns"),
+        title: Text("Volunteering Campaigns".tr),
         backgroundColor: const Color(0xFF2D7DD2),
       ),
       body: SingleChildScrollView(
@@ -66,8 +67,8 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
             children: [
               Visibility(
                 visible: logStatus,
-                child: const Text(
-                      'You Volunteered in',
+                child: Text(
+                      'You Volunteered in'.tr,
                       style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),
               ),
@@ -75,7 +76,7 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
                 visible: logStatus,
                 child: ListTile(
                         leading: const Icon(Icons.people),
-                        title: const Text('View'),
+                        title: Text('View'.tr),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16.0),
                         onTap: () {
                           Navigator.push(
@@ -87,8 +88,8 @@ class _VolunteerScreenState extends State<VolunteerScreen> {
                         },
                       ),
               ),
-              const Text(
-                    'Featured Campaigns',
+              Text(
+                    'Featured Campaigns'.tr,
                     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                   ),
               Padding(

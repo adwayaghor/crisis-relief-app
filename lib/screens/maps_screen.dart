@@ -27,7 +27,7 @@ class _DisasterMapScreenState extends State<DisasterMapScreen> {
   final String firebaseUrl =
       'https://relieflink-e824d-default-rtdb.firebaseio.com';
   // Notification range
-  final double notificationRadius = 200.0; 
+  final double notificationRadius = 200.0;
 
   @override
   void initState() {
@@ -128,10 +128,10 @@ class _DisasterMapScreenState extends State<DisasterMapScreen> {
   void _addMarker(String key, dynamic value, Set<Marker> markerSet) {
     double lat = (value['latitude'] ?? 0.0).toDouble();
     double lng = (value['longitude'] ?? 0.0).toDouble();
-    
+
     // List of disaster types
     List<String> disasterTypes = ["Earthquake", "Flood", "Tsunami"];
-    
+
     // Randomly select a disaster type
     String randomType = disasterTypes[Random().nextInt(disasterTypes.length)];
 
@@ -204,7 +204,8 @@ class _DisasterMapScreenState extends State<DisasterMapScreen> {
           : _locationError
               ? Center(
                   child: Text(
-                      "⚠️ Unable to get location. Please enable GPS and grant permissions."))
+                      "⚠️ Unable to get location. Please enable GPS and grant permissions."),
+                )
               : GoogleMap(
                   initialCameraPosition: CameraPosition(
                     target: LatLng(
