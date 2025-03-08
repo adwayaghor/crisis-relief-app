@@ -323,7 +323,7 @@ void _showLoginDialog(BuildContext context) {
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Login Required'),
-      content: const Text('You need to login to donate. Please login first.'),
+      content: const Text('You need to login to comment/post. Please login first.'),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

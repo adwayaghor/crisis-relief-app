@@ -27,7 +27,7 @@ class _DisasterMapScreenState extends State<DisasterMapScreen> {
   final String firebaseUrl =
       'https://relieflink-e824d-default-rtdb.firebaseio.com';
   // Notification range
-  final double notificationRadius = 2000.0; 
+  final double notificationRadius = 200.0; 
 
   @override
   void initState() {

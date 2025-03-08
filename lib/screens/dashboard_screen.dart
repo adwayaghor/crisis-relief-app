@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import 'dart:convert';
 import 'package:relieflink/models/crisis_update_card.dart';
 import 'package:relieflink/screens/ai_map_screen.dart';
 import 'package:relieflink/screens/forum_screen.dart';
 import 'package:relieflink/screens/maps_screen.dart';
+import 'package:relieflink/screens/gemini_api.dart';
 
 abstract class Crisis {
   final String title;
@@ -19,6 +20,54 @@ abstract class Crisis {
     required this.date,
     required this.criticalLevel,
   });
+
+  // Factory constructor to create Crisis objects from Gemini API JSON
+  static Crisis fromGeminiJson(Map<String, dynamic> json) {
+    final type = json['type'] ?? 'Unknown';
+    
+    if (type.toLowerCase().contains('natural') || 
+        ['earthquake', 'flood', 'hurricane', 'tsunami', 'wildfire', 'volcano'].any((t) => type.toLowerCase().contains(t))) {
+      return NaturalDisaster(
+        title: json['title'] ?? 'No Title',
+        description: json['description'] ?? 'No Description Available',
+        disasterType: json['type'] ?? 'Unknown',
+        country: json['location'] ?? 'Unknown Location',
+        date: json['date'] ?? DateTime.now().toString(),
+        criticalLevel: json['severity'] ?? 'Medium',
+      );
+    } else if (type.toLowerCase().contains('conflict') || 
+               type.toLowerCase().contains('humanitarian')) {
+      return HumanitarianCrisis(
+        title: json['title'] ?? 'No Title',
+        description: json['description'] ?? 'No Description Available',
+        crisisType: json['type'] ?? 'Unknown',
+        country: json['location'] ?? 'Unknown Location',
+        date: json['date'] ?? DateTime.now().toString(),
+        criticalLevel: json['severity'] ?? 'Medium',
+      );
+    } else if (type.toLowerCase().contains('disease') || 
+               type.toLowerCase().contains('pandemic') ||
+               type.toLowerCase().contains('outbreak')) {
+      return HealthCrisis(
+        title: json['title'] ?? 'No Title',
+        description: json['description'] ?? 'No Description Available',
+        diseaseType: json['type'] ?? 'Unknown',
+        country: json['location'] ?? 'Unknown Location',
+        date: json['date'] ?? DateTime.now().toString(),
+        criticalLevel: json['severity'] ?? 'Medium',
+      );
+    } else {
+      // Default to NaturalDisaster if type is unclear
+      return NaturalDisaster(
+        title: json['title'] ?? 'No Title',
+        description: json['description'] ?? 'No Description Available',
+        disasterType: 'Unspecified',
+        country: json['location'] ?? 'Unknown Location',
+        date: json['date'] ?? DateTime.now().toString(),
+        criticalLevel: json['severity'] ?? 'Medium',
+      );
+    }
+  }
 }
 
 class NaturalDisaster extends Crisis {
@@ -45,6 +94,32 @@ class NaturalDisaster extends Crisis {
   }
 }
 
+class HumanitarianCrisis extends Crisis {
+  final String crisisType;
+
+  HumanitarianCrisis({
+    required super.title,
+    required super.description,
+    required this.crisisType,
+    required super.country,
+    required super.date,
+    required super.criticalLevel,
+  });
+}
+
+class HealthCrisis extends Crisis {
+  final String diseaseType;
+
+  HealthCrisis({
+    required super.title,
+    required super.description,
+    required this.diseaseType,
+    required super.country,
+    required super.date,
+    required super.criticalLevel,
+  });
+}
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -53,7 +128,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final Dio _dio = Dio();
   List<Crisis> crises = [];
   bool isLoading = true;
   bool isError = false;
@@ -67,33 +141,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> fetchCrisisData() async {
-    String url;
+    setState(() {
+      isLoading = true;
+      isError = false;
+    });
+
+    String prompt;
     if (selectedCategory == "natural_disaster") {
-      url = 'https://api.reliefweb.int/v1/disasters?appname=relieflink&limit=5';
+      prompt = """
+        Provide a JSON object containing the latest 5 natural disasters happening around the world.
+        Include data from official sources like Red Cross, WHO, UN, and government agencies.
+        Only return a valid JSON object with no additional text.
+        Example format:
+        {
+          "crises": [
+            {
+              "title": "7.2 Magnitude Earthquake in Turkey",
+              "description": "A powerful earthquake struck eastern Turkey causing widespread damage and casualties.",
+              "type": "Earthquake",
+              "location": "Turkey",
+              "date": "2025-03-01",
+              "severity": "High",
+              "source": "UN OCHA"
+            }
+          ]
+        }
+      """;
     } else if (selectedCategory == "humanitarian_conflict") {
-      url = 'https://api.reliefweb.int/v1/reports?appname=relieflink&limit=5';
+      prompt = """
+        Provide a JSON object containing the latest 5 humanitarian crises and conflicts happening around the world.
+        Include data from official sources like Red Cross, WHO, UN, and government agencies.
+        Only return a valid JSON object with no additional text.
+        Example format:
+        {
+          "crises": [
+            {
+              "title": "Refugee Crisis in Eastern Europe",
+              "description": "Mass displacement of people due to regional conflict with inadequate humanitarian support.",
+              "type": "Humanitarian Crisis",
+              "location": "Ukraine-Moldova Border",
+              "date": "2025-02-28",
+              "severity": "Critical",
+              "source": "UNHCR"
+            }
+          ]
+        }
+      """;
     } else {
-      url =
-          'https://api.reliefweb.int/v1/reports?appname=relieflink&limit=5&query[disease]=true';
+      prompt = """
+        Provide a JSON object containing the latest 5 disease outbreaks and health emergencies happening around the world.
+        Include data from official sources like WHO, CDC, Red Cross, and health ministries.
+        Only return a valid JSON object with no additional text.
+        Example format:
+        {
+          "crises": [
+            {
+              "title": "Dengue Fever Outbreak in Southeast Asia",
+              "description": "Rising cases of dengue fever reported across multiple countries with strained healthcare systems.",
+              "type": "Disease Outbreak",
+              "location": "Thailand, Vietnam, Philippines",
+              "date": "2025-02-15",
+              "severity": "High",
+              "source": "WHO"
+            }
+          ]
+        }
+      """;
     }
 
     try {
-      final response = await _dio.get(url);
-      final List<dynamic> data = response.data['data'];
+      final String response = await GeminiService.generateText(prompt);
+      final String cleanedResponse = response.replaceAll(RegExp(r'```json|```'), '').trim();
+      
+      final Map<String, dynamic> jsonData = jsonDecode(cleanedResponse);
 
-      setState(() {
-        crises = data.map((e) {
-          if (selectedCategory == "natural_disaster") {
-            return NaturalDisaster.fromJson(e['fields']);
-          } else {
-            return NaturalDisaster.fromJson(e['fields']);
-          }
-        }).toList();
-        isLoading = false;
-        isError = false;
-      });
+      if (jsonData.containsKey("crises")) {
+        setState(() {
+          crises = (jsonData["crises"] as List)
+              .map((crisis) => Crisis.fromGeminiJson(crisis))
+              .toList();
+          isLoading = false;
+        });
+      } else {
+        throw Exception("Invalid JSON format: missing 'crises' key");
+      }
     } catch (e) {
-      print('Error fetching crisis data: $e');
+      print('Error fetching crisis data from Gemini: $e');
       setState(() {
         isLoading = false;
         isError = true;
@@ -176,27 +309,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 16.0),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: DropdownButton<String>(
-                    value: selectedCategory,
-                    items: const [
-                      DropdownMenuItem(
-                          value: "natural_disaster",
-                          child: Text("Natural Disaster")),
-                      DropdownMenuItem(
-                          value: "humanitarian_conflict",
-                          child: Text("Humanitarian Conflict")),
-                      DropdownMenuItem(
-                          value: "pandemic", child: Text("Pandemic")),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      DropdownButton<String>(
+                        value: selectedCategory,
+                        items: const [
+                          DropdownMenuItem(
+                              value: "natural_disaster",
+                              child: Text("Natural Disaster")),
+                          DropdownMenuItem(
+                              value: "humanitarian_conflict",
+                              child: Text("Humanitarian Conflict")),
+                          DropdownMenuItem(
+                              value: "pandemic", child: Text("Pandemic")),
+                        ],
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              selectedCategory = newValue;
+                              fetchCrisisData();
+                            });
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: fetchCrisisData,
+                      ),
                     ],
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          selectedCategory = newValue;
-                          isLoading = true;
-                          fetchCrisisData();
-                        });
-                      }
-                    },
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -204,18 +345,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : isError
-                          ? const Center(
-                              child: Text('Failed to load crisis updates.'))
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text('Failed to load crisis updates.'),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: fetchCrisisData,
+                                    child: const Text('Try Again'),
+                                  ),
+                                ],
+                              ),
+                            )
                           : ListView.builder(
                               padding: const EdgeInsets.all(16.0),
                               itemCount: crises.length,
                               itemBuilder: (context, index) {
                                 final crisis = crises[index];
+                                String categoryType = 'Unknown';
+                                
+                                if (crisis is NaturalDisaster) {
+                                  categoryType = crisis.disasterType;
+                                } else if (crisis is HumanitarianCrisis) {
+                                  categoryType = crisis.crisisType;
+                                } else if (crisis is HealthCrisis) {
+                                  categoryType = crisis.diseaseType;
+                                }
+                                
                                 return CrisisUpdateCard(
                                   title: crisis.title,
-                                  description:
-                                      '${crisis.runtimeType}: ${crisis.description}',
-                                  category: crisis.runtimeType.toString(),
+                                  description: crisis.description,
+                                  category: categoryType,
                                   timestamp: crisis.date,
                                   criticalLevel: crisis.criticalLevel,
                                   onTap: () {},
