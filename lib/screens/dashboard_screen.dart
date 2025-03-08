@@ -58,7 +58,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool isLoading = true;
   bool isError = false;
   String selectedCategory = "natural_disaster";
-  PageController _pageController = PageController();
   int _currentPage = 0; // Track current page index
 
   @override

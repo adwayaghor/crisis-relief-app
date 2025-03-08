@@ -5,9 +5,7 @@ import 'package:relieflink/admin/adminpage.dart';
 import 'package:relieflink/login/splash_screen.dart';
 import 'package:relieflink/models/database_functions.dart';
 import 'package:relieflink/models/notification.dart';
-// import 'package:relieflink/screens/noti_button.dart';
 import 'package:relieflink/shared_preferences.dart';
-import 'package:relieflink/models/donation/create_campaign_card.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

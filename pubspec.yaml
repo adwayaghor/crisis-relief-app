@@ -47,6 +47,7 @@ dependencies:
   razorpay_flutter: ^1.4.0
   onesignal_flutter: ^5.3.0
   shimmer: ^3.0.0
+  flutter_local_notifications: ^18.0.1
 
 dev_dependencies:
   flutter_test:
