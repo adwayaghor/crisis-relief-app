@@ -4,19 +4,23 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:relieflink/admin/adminpage.dart';
 import 'package:relieflink/login/splash_screen.dart';
 import 'package:relieflink/models/database_functions.dart';
+import 'package:relieflink/models/notification.dart';
+// import 'package:relieflink/screens/noti_button.dart';
 import 'package:relieflink/shared_preferences.dart';
+import 'package:relieflink/models/donation/create_campaign_card.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  NotiServcie().initNotification();
   await loadAdminStatus();
   await loadLoginStatus();
   await loadIDStatus();
   await loadisNGOStatus();
-  
-DisasterDataFetcher().fetchAndStoreDisasters();
+
+  DisasterDataFetcher().fetchAndStoreDisasters();
 
   // Await OneSignal initialization
-  OneSignal.initialize('419ea6c0-3874-4aa5-9e7c-04713d0d063f');  
+  OneSignal.initialize('419ea6c0-3874-4aa5-9e7c-04713d0d063f');
   await OneSignal.Notifications.requestPermission(true);
 
   // Add observer AFTER ensuring OneSignal is initialized
@@ -24,11 +28,8 @@ DisasterDataFetcher().fetchAndStoreDisasters();
     print("OneSignal Player ID: $event");
   });
 
-
   runApp(const CrisisAssistApp());
 }
-
-
 
 class CrisisAssistApp extends StatelessWidget {
   const CrisisAssistApp({super.key});
@@ -67,6 +68,7 @@ class CrisisAssistApp extends StatelessWidget {
         ),
       ),
       home: setInitialScreen(),
+      // home: NotiButton(),
     );
   }
 }
