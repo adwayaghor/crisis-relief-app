@@ -121,9 +121,8 @@ class _NGOSignUpScreenState extends State<NGOSignUpScreen2> {
       onWillPop: () async => false,
       child: Scaffold(
         backgroundColor: const Color(0xFF2D7DD2),
-        body: Container(
           
-          child: Center(
+          body: Center(
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -196,7 +195,7 @@ class _NGOSignUpScreenState extends State<NGOSignUpScreen2> {
               ),
             ),
           ),
-        ),
+        
       ),
     );
   }

@@ -21,9 +21,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _form = GlobalKey<FormState>();
   var _enteredEmail = '';
   // ignore: unused_field
-  var _enteredPassword = '';
+  final _enteredPassword = '';
   // ignore: unused_field
-  var _isLogin = true;
+  final _isLogin = true;
 
   void _submit() async {
     final isValid = _form.currentState!.validate();

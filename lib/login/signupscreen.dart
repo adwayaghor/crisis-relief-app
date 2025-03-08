@@ -120,129 +120,126 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: const Color(0xFF2D7DD2),
-        body: Container(
-          child: Center(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Card(
-                    color: Colors.white,
-                    margin: const EdgeInsets.all(20),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Form(
-                        key: _form,
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              decoration: const InputDecoration(
-                                  labelText: 'Email Address'),
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (value) {
-                                if (value == null ||
-                                    value.trim().isEmpty ||
-                                    !value.contains('@')) {
-                                  return 'Please enter a valid email address.';
-                                }
-                                return null;
-                              },
-                              onSaved: (value) {
-                                _enteredEmail = value!;
-                              },
+        body: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Card(
+                  color: Colors.white,
+                  margin: const EdgeInsets.all(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Form(
+                      key: _form,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            decoration: const InputDecoration(
+                                labelText: 'Email Address'),
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) {
+                              if (value == null ||
+                                  value.trim().isEmpty ||
+                                  !value.contains('@')) {
+                                return 'Please enter a valid email address.';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _enteredEmail = value!;
+                            },
+                          ),
+                          TextFormField(
+                            decoration:
+                                const InputDecoration(labelText: 'First Name'),
+                            onSaved: (value) {
+                              _enteredFirstName = value!;
+                            },
+                          ),
+                          TextFormField(
+                            decoration:
+                                const InputDecoration(labelText: 'Last Name'),
+                            onSaved: (value) {
+                              _enteredLastName = value!;
+                            },
+                          ),
+                          TextFormField(
+                            decoration: const InputDecoration(
+                                labelText: 'Contact Number'),
+                            onSaved: (value) {
+                              _enteredContact = value!;
+                            },
+                          ),
+                          TextFormField(
+                            decoration:
+                                const InputDecoration(labelText: 'Location'),
+                            onSaved: (value) {
+                              _enteredLocation = value!;
+                            },
+                          ),
+                          TextFormField(
+                            decoration: const InputDecoration(
+                                labelText: 'Emergency Details'),
+                            onSaved: (value) {
+                              _emergencyDetails = value!;
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: _submit,
+                            child: const Text('Send OTP'),
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: () async {
+                              await saveLoginStatus(true);
+                              logStatus = true;
+                              print('the log status is true now');
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const HomePage()),
+                                (route) => false,
+                              );
+                            },
+                            child: const Text('Temp Login'),
+                          ),
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginScreen()),
+                              );
+                            },
+                            child: const Text(
+                              'I already have an Account',
+                              style: TextStyle(color: Colors.black),
                             ),
-                            TextFormField(
-                              decoration: const InputDecoration(
-                                  labelText: 'First Name'),
-                              onSaved: (value) {
-                                _enteredFirstName = value!;
-                              },
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const NGOSignUpScreen()),
+                              );
+                            },
+                            child: const Text(
+                              'Register as an NGO',
+                              style: TextStyle(
+                                  color: Color.fromARGB(255, 76, 150, 189)),
                             ),
-                            TextFormField(
-                              decoration:
-                                  const InputDecoration(labelText: 'Last Name'),
-                              onSaved: (value) {
-                                _enteredLastName = value!;
-                              },
-                            ),
-                            TextFormField(
-                              decoration: const InputDecoration(
-                                  labelText: 'Contact Number'),
-                              onSaved: (value) {
-                                _enteredContact = value!;
-                              },
-                            ),
-                            TextFormField(
-                              decoration:
-                                  const InputDecoration(labelText: 'Location'),
-                              onSaved: (value) {
-                                _enteredLocation = value!;
-                              },
-                            ),
-                            TextFormField(
-                              decoration: const InputDecoration(
-                                  labelText: 'Emergency Details'),
-                              onSaved: (value) {
-                                _emergencyDetails = value!;
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: _submit,
-                              child: const Text('Send OTP'),
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () async {
-                                await saveLoginStatus(true);
-                                logStatus = true;
-                                print('the log status is true now');
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const HomePage()),
-                                  (route) => false,
-                                );
-                              },
-                              child: const Text('Temp Login'),
-                            ),
-                            const SizedBox(height: 12),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LoginScreen()),
-                                );
-                              },
-                              child: const Text(
-                                'I already have an Account',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const NGOSignUpScreen()),
-                                );
-                              },
-                              child: const Text(
-                                'Register as an NGO',
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 76, 150, 189)),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

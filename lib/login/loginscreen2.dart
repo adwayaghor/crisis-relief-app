@@ -70,9 +70,9 @@ class _LoginScreen2State extends State<LoginScreen2> {
       // onWillPop: () async => false,
       child: Scaffold(
         backgroundColor:const Color(0xFF2D7DD2),
-        body: Container(
+        // body: Container(
           
-          child: Center(
+          body: Center(
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -185,7 +185,7 @@ class _LoginScreen2State extends State<LoginScreen2> {
               ),
             ),
           ),
-        ),
+        // ),
       ),
     );
   }

@@ -24,25 +24,22 @@ class _SuccessScreenState extends State<SuccessScreen> {
         (route) => false,
       );
     });
-  } 
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 100),
-              const SizedBox(height: 20),
-              Text(
-                isSigningIn ? "SignUp Successful!" : "Login Successful!",
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 100),
+            const SizedBox(height: 20),
+            Text(
+              isSigningIn ? "SignUp Successful!" : "Login Successful!",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
     );
